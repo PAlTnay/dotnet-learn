@@ -1,9 +1,11 @@
 ﻿// Складання матриці з числом зі строковим розподілом по стовпцях.
 using AdvancedMath;
 
+Console.WriteLine(Environment.GetCommandLineArgs()[0]);
+
 Matrix<int> matrixSample = new Matrix<int>(5,5);
 MatrixElementApplier<int,int> adder = new MatrixElementApplier<int, int>();
-adder.ApplyElementToElements(matrixSample, 5, delegate(int a, int b){ return a + b;}).Print();
+adder.ApplyElementToElementsThreaded(matrixSample, 5, delegate(int a, int b){ return a + b;}).Print();
 
 namespace AdvancedMath{
     internal class Matrix<T>{
@@ -45,6 +47,31 @@ namespace AdvancedMath{
                     MatrixToAdd[i, j] = Add(MatrixToAdd[i, j], ElementToAdd);
                 }
             }
+            return MatrixToAdd;
+        }
+        public Matrix<T> ApplyElementToElementsThreaded(Matrix<T> MatrixToAdd, F ElementToAdd, ApplyDelegate Add){
+
+            void ApplyInThread(object? ColumnIndexObj){
+                if (ColumnIndexObj is uint columtIndex)
+                {       
+                    for(uint row = 0; row < MatrixToAdd.ToArray().GetLength(0); ++row){
+                        MatrixToAdd[row, columtIndex] = Add(MatrixToAdd[row, columtIndex], ElementToAdd);
+                    }
+                }
+            }
+
+            int matrixColumnsCount = MatrixToAdd.ToArray().GetLength(1);
+            Thread[] rowAditionThreads = new Thread[matrixColumnsCount];
+
+            for(uint column = 0; column < matrixColumnsCount; ++column){
+                rowAditionThreads[column] = new Thread(new ParameterizedThreadStart(ApplyInThread));
+                rowAditionThreads[column].Start(column);
+            }
+            
+            foreach(Thread thread in rowAditionThreads){
+                thread.Join();
+            }
+            
             return MatrixToAdd;
         }
     }
