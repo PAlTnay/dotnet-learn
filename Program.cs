@@ -1,18 +1,49 @@
 ﻿// Складання матриці з числом зі строковим розподілом по стовпцях.
-using System.Diagnostics;
+using System;
 using AdvancedMath;
 
-Console.WriteLine(Environment.GetCommandLineArgs()[0]);
+Console.WriteLine("Matrix size:");
+string matrixSizeLine = Console.ReadLine();
 
-Matrix<int> matrixSample = new Matrix<int>(12,12);
-MatrixElementApplier<int,int> adder = new MatrixElementApplier<int, int>();
-adder.ApplyElementToElementsThreaded(matrixSample, 5, delegate(int a, int b){ return a + b;}).Print();
+string[] size = matrixSizeLine.Split(' ', 2);
+int rowsCount = int.Parse(size[0]);
+int columnsCount = int.Parse(size[1]);
+
+Console.WriteLine("To add:");
+int numberToAdd = int.Parse(Console.ReadLine());
+
+
+Console.WriteLine("ShowMatrix?(true,false):");
+bool showMatrix = bool.Parse(Console.ReadLine());
+
+Matrix<int> matrixSample = new Matrix<int>(rowsCount,columnsCount, showMatrix);
+matrixSample.Print();
+MatrixElementApplier<int, int> adder = new MatrixElementApplier<int, int>();
+
+Console.WriteLine("Single thread:");
+var watch = System.Diagnostics.Stopwatch.StartNew();
+adder.ApplyElementToElements(matrixSample, numberToAdd, delegate(int a, int b){ return a + b;}).Print();
+
+watch.Stop();
+Console.WriteLine($"Execution Time: {watch.ElapsedMilliseconds} ms");
+matrixSample.Reset();
+
+Console.WriteLine("Multy thread:");
+watch.Reset();
+watch.Start();
+
+adder.ApplyElementToElementsThreaded(matrixSample, numberToAdd, delegate(int a, int b){ return a + b;}).Print();
+
+watch.Stop();
+Console.WriteLine($"Execution Time: {watch.ElapsedMilliseconds} ms");
 
 namespace AdvancedMath{
     internal class Matrix<T>{
         private T[,] _matrixField;
-        public Matrix(int RowCount = 0, int ColumnCount = 0){
+        private bool _allowPrintMatrix = false;
+        public Matrix(int RowCount = 0, int ColumnCount = 0, bool ShowMatrix = false){
             _matrixField = new T[RowCount, ColumnCount];
+            _allowPrintMatrix = ShowMatrix;
         }
 
         public Matrix(Matrix<T> CopyMatrix){
@@ -30,12 +61,22 @@ namespace AdvancedMath{
         }
 
         public void Print(){
-                for(int i = 0; i < this.ToArray().GetLength(0); ++i){
-                    for(int j = 0; j < this.ToArray().GetLength(1); ++j){
-                        Console.Write(_matrixField[i, j].ToString() + " ");
-                    }
-                    Console.Write("\n");
+            if(!_allowPrintMatrix) return; 
+
+            for(int i = 0; i < this.ToArray().GetLength(0); ++i){
+                for(int j = 0; j < this.ToArray().GetLength(1); ++j){
+                    Console.Write(_matrixField[i, j].ToString() + " ");
                 }
+                Console.Write("\n");
+            }
+        }
+
+        public void Reset(){
+            for(int i = 0; i < this.ToArray().GetLength(0); ++i){
+                for(int j = 0; j < this.ToArray().GetLength(1); ++j){
+                    _matrixField[i, j] = default(T);
+                }
+            }
         }
     }
 
@@ -89,8 +130,6 @@ namespace AdvancedMath{
                 rowAditionThreads[threadIndex].Start();
             }
 
-            //Console.WriteLine(Process.GetCurrentProcess().Threads.Count.ToString());
-
             foreach(Thread thread in rowAditionThreads){
                 thread.Join();
             }
@@ -100,9 +139,3 @@ namespace AdvancedMath{
         }
     }
 }
-
-
-
-
-
-
