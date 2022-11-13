@@ -4,45 +4,48 @@ using System.Linq;
 
 class Lab2 : UserCustom.Lab{
     public void Entry(){
-        using (var db = new SomeContext()) {
+        // using (var db = new SomeContext()) {
 
-            Console.WriteLine($"Database path: {db.DbPath}.");
+        //     Console.WriteLine($"Database path: {db.DbPath}.");
 
-            Console.WriteLine("Inserting a new info");
-            db.Add(new SomeInfo { SomeValue = 6 });
-            db.SaveChanges();
+        //     Console.WriteLine("Inserting a new info");
+        //     db.Add(new SomeInfo { SomeValue = 6 });
+        //     db.SaveChanges();
 
-            // Read
-            Console.WriteLine("Querying for a someInfo");
+        //     // Read
+        //     Console.WriteLine("Querying for a someInfo");
             
-            var someInfo = (from i in db.Info orderby i.Id select i).First();
+        //     var someInfo = (from i in db.Info orderby i.Id select i).First();
 
-            // Update
-            Console.WriteLine("Updating the someInfo");
-            someInfo.SomeValue = 100;
-            db.SaveChanges();
+        //     // Update
+        //     Console.WriteLine("Updating the someInfo");
+        //     someInfo.SomeValue = 100;
+        //     db.SaveChanges();
 
-            // Delete
-            Console.WriteLine("Delete the someInfo");
-            db.Remove(someInfo);
-            db.SaveChanges();
-        }
+        //     // Delete
+        //     Console.WriteLine("Delete the someInfo");
+        //     db.Remove(someInfo);
+        //     db.SaveChanges();
+        // }
     }
 }
 
 
 
-public class SomeContext :DbContext{
 
-    public DbSet<SomeInfo> Info { get; set; }
+
+
+public class MovieTicketsContext :DbContext{
+
+    public DbSet<MovieTicket> MovieTickets { get; set; }
 
     
     public string DbPath { get; }
 
-    public SomeContext(){
+    public MovieTicketsContext(){
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var path = Environment.GetFolderPath(folder);
-        DbPath = System.IO.Path.Join(path, "Some.db");
+        DbPath = System.IO.Path.Join(path, "MovieTickets.db");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options){
@@ -51,9 +54,11 @@ public class SomeContext :DbContext{
 
 }
 
-public class SomeInfo
+public class MovieTicket
 {
-    //[System.ComponentModel.DataAnnotations.Key]
     public int Id { get; set; }
-    public int SomeValue { get; set; }
+
+    public string MovieName { get; set; }
+    public int HallNumber { get; set; }
+    public int SeatPlaceNumber { get; set; }
 }

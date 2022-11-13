@@ -4,7 +4,7 @@
 
 namespace dotnet_learn.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class BecomeMovieTicket : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -14,7 +14,9 @@ namespace dotnet_learn.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    SomeValue = table.Column<int>(type: "INTEGER", nullable: false)
+                    MovieName = table.Column<string>(type: "TEXT", nullable: false),
+                    HallNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    SeatPlaceNumber = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
