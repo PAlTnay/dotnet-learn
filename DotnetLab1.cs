@@ -28,7 +28,8 @@ class Lab1 : UserCustom.Lab{
         adder.ApplyElementToElements(matrixSample, numberToAdd, delegate(int a, int b){ return a + b;}).Print();
 
         watch.Stop();
-        Console.WriteLine($"Execution Time: {watch.ElapsedMilliseconds} ms");
+        double singleThreadTime = watch.Elapsed.TotalMilliseconds;
+        Console.WriteLine($"Execution Time: {singleThreadTime} ms");
         matrixSample.Reset();
 
         Console.WriteLine("Multy thread:");
@@ -38,8 +39,9 @@ class Lab1 : UserCustom.Lab{
         adder.ApplyElementToElementsThreaded(matrixSample, numberToAdd, delegate(int a, int b){ return a + b;}).Print();
 
         watch.Stop();
-        Console.WriteLine($"Execution Time: {watch.ElapsedMilliseconds} ms");
-
+        double multiThreadTime = watch.Elapsed.TotalMilliseconds;
+        Console.WriteLine($"Execution Time: {multiThreadTime} ms \n");
+        Console.WriteLine($"Acceleration: {singleThreadTime / multiThreadTime}");
     }
 }
 
