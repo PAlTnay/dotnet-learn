@@ -16,22 +16,31 @@ public class Lab2 : UserCustom.Lab{
 public class Cinema
 {
     public MovieTicketsContext ticketsContext { get; }
-
     public Cinema()
     {
         ticketsContext = new MovieTicketsContext();
         ticketsContext.Movies.Add(new Movie { MovieName = "mvi1" });
         ticketsContext.Movies.Add(new Movie { MovieName = "mvi2" });
+        ticketsContext.Movies.Add(new Movie { MovieName = "mvi3" });
+        ticketsContext.Movies.Add(new Movie { MovieName = "mvi4" });
         ticketsContext.SaveChanges();
         ticketsContext.Add(new Hall
         {
-            CurrentMovie = ticketsContext.Movies.FirstOrDefault(),
+            CurrentMovie = (from movie in ticketsContext.Movies orderby movie select movie).LastOrDefault(),
             SeatsCount = 100,
             FreeSeatsCount = 100
         });
         ticketsContext.Add(new Hall
         {
-            CurrentMovie = ticketsContext.Movies.LastOrDefault(),
+
+            SeatsCount = 100,
+            FreeSeatsCount = 100
+        });
+        ticketsContext.SaveChanges();
+
+        ticketsContext.Add(new Hall
+        {
+
             SeatsCount = 100,
             FreeSeatsCount = 100
         });
@@ -47,7 +56,7 @@ public class Cinema
         ticketsContext.MovieTickets.RemoveRange(from ticket in ticketsContext.MovieTickets where ticket.MovieInfo == movie select ticket);
         foreach(Hall curhHall in (from hall in ticketsContext.Halls where hall.CurrentMovie == movie select hall))
         {
-            curhHall.CurrentMovie = null;
+            curhHall.CurrentMovie = Movie.EmptyMovie;
         }
         
         ticketsContext.Movies.Remove(movie);
@@ -104,6 +113,10 @@ public class MovieTicketsContext :DbContext{
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var path = Environment.GetFolderPath(folder);
         DbPath = System.IO.Path.Join(path, "MovieTickets.db");
+        
+        Database.EnsureDeleted();
+        Database.EnsureCreated();
+        Database.Migrate();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -112,47 +125,45 @@ public class MovieTicketsContext :DbContext{
         modelBuilder.Entity<MovieTicket>().HasOne(ticket => ticket.MovieInfo).WithMany(movie => movie.Tickets).IsRequired();
         modelBuilder.Entity<MovieTicket>().HasOne(ticket => ticket.MovieHall).WithMany().IsRequired();
         modelBuilder.Entity<Hall>().HasKey(hall => hall.HallNumber);
-        modelBuilder.Entity<Hall>().HasOne(hall => hall.CurrentMovie).WithOne().IsRequired();
+        modelBuilder.Entity<Hall>().HasOne<Movie>(hall => hall.CurrentMovie).WithMany().IsRequired();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         options.UseSqlite($"Data Source={DbPath}");
+        
     }
 
 }
 
-//[Table("MovieTicket")]
 public class MovieTicket
 {
     
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-    public Movie MovieInfo { get; set; }
+    public Movie MovieInfo { get; set; } = Movie.EmptyMovie;
     public Hall MovieHall { get; set; }
 }
 
-//[Table("MovieInfo")]
 public class Movie
 {
+    public static Movie EmptyMovie = new Movie();
+
     [Key]
-    public string MovieName { get; set; }
-    public List<MovieTicket> Tickets {get; set; }
+    public string MovieName { get; set; } = "";
+    public List<MovieTicket> Tickets { get; set; } = new ();
 }
 
-//[Table("Hall")]
 public class Hall
 {
-    
+    [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int HallNumber;
+    public int HallNumber { get; set; }
 
-    [ForeignKey(nameof(CurrentMovie))]
-    public string? MovieName;
+    
+    public Movie CurrentMovie = Movie.EmptyMovie;
 
-    public Movie? CurrentMovie;
-    public int SeatsCount;
-    public int FreeSeatsCount;
+    public int SeatsCount { get; set; }
+    public int FreeSeatsCount { get; set; }
 }
-
 
