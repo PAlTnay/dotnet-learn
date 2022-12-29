@@ -4,7 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
-class Lab2 : UserCustom.Lab{
+
+
+namespace Lab2;
+public class Lab2 : UserCustom.Lab{
     public void Entry(){
         Cinema cinema = new Cinema();
     }
@@ -12,12 +15,29 @@ class Lab2 : UserCustom.Lab{
 
 public class Cinema
 {
-    private MovieTicketsContext ticketsContext;
+    public MovieTicketsContext ticketsContext { get; }
 
     public Cinema()
     {
         ticketsContext = new MovieTicketsContext();
+        ticketsContext.Movies.Add(new Movie { MovieName = "mvi1" });
+        ticketsContext.Movies.Add(new Movie { MovieName = "mvi2" });
+        ticketsContext.SaveChanges();
+        ticketsContext.Add(new Hall
+        {
+            CurrentMovie = ticketsContext.Movies.FirstOrDefault(),
+            SeatsCount = 100,
+            FreeSeatsCount = 100
+        });
+        ticketsContext.Add(new Hall
+        {
+            CurrentMovie = ticketsContext.Movies.LastOrDefault(),
+            SeatsCount = 100,
+            FreeSeatsCount = 100
+        });
+        ticketsContext.SaveChanges();
     }
+
 
     public void RemoveMovieSessions(string _MovieName)
     {
@@ -62,7 +82,9 @@ public class Cinema
         Movie? movie = (from movieInfo in ticketsContext.Movies where movieInfo.MovieName == _MovieName select movieInfo).FirstOrDefault();
         if(movie is null) return;
 
-        (from hall in ticketsContext.Halls where hall.CurrentMovie == movie select hall).ToList().ForEach(hall=>hall.CurrentMovie = movie);
+        (from hall in ticketsContext.Halls where hall.HallNumber == HallNumber select hall).ToList().ForEach(hall=>hall.CurrentMovie = movie);
+
+        ticketsContext.MovieTickets.RemoveRange(from ticket in ticketsContext.MovieTickets where ticket.MovieInfo == movie && ticket.MovieHall.HallNumber == HallNumber select ticket);
         ticketsContext.SaveChanges();
     }
 }
@@ -89,6 +111,7 @@ public class MovieTicketsContext :DbContext{
         modelBuilder.Entity<Movie>().HasMany(movie => movie.Tickets).WithOne(ticket => ticket.MovieInfo).IsRequired();
         modelBuilder.Entity<MovieTicket>().HasOne(ticket => ticket.MovieInfo).WithMany(movie => movie.Tickets).IsRequired();
         modelBuilder.Entity<MovieTicket>().HasOne(ticket => ticket.MovieHall).WithMany().IsRequired();
+        modelBuilder.Entity<Hall>().HasKey(hall => hall.HallNumber);
         modelBuilder.Entity<Hall>().HasOne(hall => hall.CurrentMovie).WithOne().IsRequired();
     }
 
@@ -99,18 +122,17 @@ public class MovieTicketsContext :DbContext{
 
 }
 
-[Table("MovieTicket")]
+//[Table("MovieTicket")]
 public class MovieTicket
 {
-    [Key]
+    
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-
     public Movie MovieInfo { get; set; }
     public Hall MovieHall { get; set; }
 }
 
-[Table("MovieInfo")]
+//[Table("MovieInfo")]
 public class Movie
 {
     [Key]
@@ -118,12 +140,16 @@ public class Movie
     public List<MovieTicket> Tickets {get; set; }
 }
 
-[Table("Hall")]
+//[Table("Hall")]
 public class Hall
 {
-    [Key]
+    
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int HallNumber;
+
+    [ForeignKey(nameof(CurrentMovie))]
+    public string? MovieName;
+
     public Movie? CurrentMovie;
     public int SeatsCount;
     public int FreeSeatsCount;

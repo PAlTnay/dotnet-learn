@@ -1,6 +1,6 @@
 ﻿//entrypoint 
 using UserCustom;
-
+using Lab2;
 
 try{
     string labnStr = Utilities.GetArgumentValue("labn");
@@ -9,7 +9,7 @@ try{
             (new Lab1()).Entry();
         break;
         case 2:
-             (new Lab2()).Entry();
+             (new Lab2.Lab2()).Entry();
         break;
 
         default:

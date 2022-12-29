@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "dotnet-learn": {
+      "commandName": "Project",
+      "commandLineArgs": "--labn 2"
+    }
+  }
+}
