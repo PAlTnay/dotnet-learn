@@ -48,7 +48,7 @@ public class Cinema
     }
 
 
-    public void RemoveMovieSessions(string _MovieName)
+    public void RemoveMovie(string _MovieName)
     {
         Movie? movie = (from movieInfo in ticketsContext.Movies where movieInfo.MovieName == _MovieName select movieInfo).FirstOrDefault();
         if(movie is null) return;
@@ -60,6 +60,14 @@ public class Cinema
         }
         
         ticketsContext.Movies.Remove(movie);
+        ticketsContext.SaveChanges();
+    }
+
+    public void AddMovie(string _MovieName)
+    {
+        if ((from movieInfo in ticketsContext.Movies where movieInfo.MovieName == _MovieName select movieInfo).Count() > 0) return;
+
+        ticketsContext.Movies.Add(new Movie { MovieName= _MovieName });
         ticketsContext.SaveChanges();
     }
 
