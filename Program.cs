@@ -1,22 +1,23 @@
 ﻿//entrypoint 
 using UserCustom;
-using Lab2;
+using CinemaSpace;
 
-try{
-    string labnStr = Utilities.GetArgumentValue("labn");
-    switch(int.Parse(labnStr)){
-        case 1:
-            (new Lab1()).Entry();
-        break;
-        case 2:
-             (new Lab2.Lab2()).Entry();
-        break;
+Console.WriteLine("Hello World!");
+// try{
+//     string labnStr = Utilities.GetArgumentValue("labn");
+//     switch(int.Parse(labnStr)){
+//         case 1:
+//             (new Lab1()).Entry();
+//         break;
+//         case 2:
+//             (new CinemaSpace.Lab2()).Entry();
+//         break;
 
-        default:
+//         default:
 
-        break;
-    }
+//         break;
+//     }
 
-}catch(Exception ex){
-    Console.WriteLine(ex.ToString());
-}
+// }catch(Exception ex){
+//     Console.WriteLine(ex.ToString());
+// }
