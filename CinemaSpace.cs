@@ -20,6 +20,12 @@ public class Cinema
             SeatsCount = 100,
             FreeSeatsCount = 100
         });
+        ticketsContext.Halls.Add(new Hall
+        {
+            CurrentMovie = (from movie in ticketsContext.Movies orderby movie select movie).FirstOrDefault(),
+            SeatsCount = 100,
+            FreeSeatsCount = 100
+        });
         ticketsContext.SaveChanges();
     }
 
