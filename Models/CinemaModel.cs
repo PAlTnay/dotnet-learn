@@ -22,7 +22,6 @@ public class Movie
 
     [Key]
     public string MovieName { get; set; } = "Empty";
-    public List<MovieTicket> Tickets { get; set; } = new();
 }
 
 public class Hall
@@ -35,7 +34,6 @@ public class Hall
     public string MovieName { get; set; } = "";
     public Movie CurrentMovie = Movie.EmptyMovie;
     public int SeatsCount { get; set; } = 100;
-    public HashSet<int> TakenSeats { get; set; } = new();
     public int FreeSeatsCount { get; set; } = 100;
 }
 

@@ -77,8 +77,9 @@ public class Cinema
         ticketsContext.SaveChanges();
     }
 
-    public bool AddTicket(string _MovieName, int HallNumber, int SeatNumber)
+    public bool AddTicket(string _MovieName, int HallNumber, int SeatNumber, out bool IsAlreadyTaken)
     {
+        IsAlreadyTaken = false;
         Movie? movie = (from movieInfo in ticketsContext.Movies where movieInfo.MovieName == _MovieName select movieInfo).FirstOrDefault();
         if (movie is null) return false;
 
@@ -86,10 +87,13 @@ public class Cinema
         if (choosenHall is null) return false;
 
         if (choosenHall.CurrentMovie != movie) return false;
-        if(choosenHall.TakenSeats.Contains(SeatNumber)) return false;
 
+        if(GetTakenSeats(HallNumber).Contains(SeatNumber))
+        {
+            IsAlreadyTaken = true;
+            return false;
+        }
         --choosenHall.FreeSeatsCount;
-        choosenHall.TakenSeats.Add(SeatNumber);
 
         ticketsContext.MovieTickets.Add(
             new MovieTicket
@@ -135,6 +139,14 @@ public class Cinema
         ticketsContext.MovieTickets.RemoveRange(from ticket in ticketsContext.MovieTickets where ticket.MovieInfo == movie select ticket);
         ticketsContext.SaveChanges();
     }
+
+    public HashSet<int> GetTakenSeats(int hallNumber)
+    {
+        
+        Hall? choosenHall = (from hall in ticketsContext.Halls where hall.HallNumber == hallNumber select hall).FirstOrDefault();
+        if (choosenHall is null) return new HashSet<int>();
+        return (from ticket in ticketsContext.MovieTickets where ticket.MovieName == choosenHall.MovieName && ticket.HallNumber == choosenHall.HallNumber select ticket.SeatNumber).ToHashSet();
+    }
 }
 
 
@@ -162,8 +174,6 @@ public class MovieTicketsContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Movie>().HasMany(movie => movie.Tickets).WithOne(ticket => ticket.MovieInfo).IsRequired();
-        modelBuilder.Entity<MovieTicket>().HasOne(ticket => ticket.MovieInfo).WithMany(movie => movie.Tickets).IsRequired();
         modelBuilder.Entity<Hall>().HasKey(hall => hall.HallNumber);
         modelBuilder.Entity<Hall>().HasOne(hall => hall.CurrentMovie).WithMany().IsRequired();
         modelBuilder.Entity<MovieTicket>().HasOne(ticket => ticket.HallInfo).WithMany().IsRequired();
