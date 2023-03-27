@@ -77,26 +77,30 @@ public class Cinema
         ticketsContext.SaveChanges();
     }
 
-    public void AddTicket(string _MovieName, int HallNumber)
+    public bool AddTicket(string _MovieName, int HallNumber, int SeatNumber)
     {
         Movie? movie = (from movieInfo in ticketsContext.Movies where movieInfo.MovieName == _MovieName select movieInfo).FirstOrDefault();
-        if (movie is null) return;
+        if (movie is null) return false;
 
         Hall? choosenHall = (from hall in ticketsContext.Halls where hall.HallNumber == HallNumber select hall).FirstOrDefault();
-        if (choosenHall is null) return;
+        if (choosenHall is null) return false;
 
-        if (choosenHall.CurrentMovie != movie) return;
+        if (choosenHall.CurrentMovie != movie) return false;
+        if(choosenHall.TakenSeats.Contains(SeatNumber)) return false;
 
         --choosenHall.FreeSeatsCount;
+        choosenHall.TakenSeats.Add(SeatNumber);
 
         ticketsContext.MovieTickets.Add(
             new MovieTicket
             {
                 MovieInfo = movie,
-                HallInfo = choosenHall
+                HallInfo = choosenHall,
+                SeatNumber = SeatNumber
             }
         );
         ticketsContext.SaveChanges();
+        return true;
     }
     public void AddTicket(string _MovieName)
     {

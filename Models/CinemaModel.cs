@@ -13,6 +13,7 @@ public class MovieTicket
     [ForeignKey("HallInfo")]
     public int HallNumber { get; set; } = 0;
     public Hall HallInfo { get; set; } = Hall.EmptyHall;
+    public int SeatNumber {get; set; } = 0;
 }
 
 public class Movie
@@ -34,6 +35,7 @@ public class Hall
     public string MovieName { get; set; } = "";
     public Movie CurrentMovie = Movie.EmptyMovie;
     public int SeatsCount { get; set; } = 100;
+    public HashSet<int> TakenSeats { get; set; } = new();
     public int FreeSeatsCount { get; set; } = 100;
 }
 
