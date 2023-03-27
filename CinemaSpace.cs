@@ -32,7 +32,8 @@ public class Cinema
     public static bool IsValidMovie(Movie movie)
     {
 
-        return movie != null && movie.MovieName != null && movie.MovieName.Trim() != "" && movie != Movie.EmptyMovie;
+        return movie != null && movie.MovieName != null && movie.MovieName.Trim() != "" && 
+            movie != Movie.EmptyMovie && movie.MovieName != Movie.EmptyMovie.MovieName;
     }
 
     public DbSet<Movie> GetMovies()
